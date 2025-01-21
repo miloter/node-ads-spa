@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
 import TableXp from '../../components/TableXp/TableXp.vue';
-import { host, appendAlert, removeAlerts } from '../../utils/globals.js';
+import { host, getUser, appendAlert, removeAlerts } from '../../utils/globals.js';
 
 const { user } = storeToRefs(useSession());
 const router = useRouter();
@@ -88,23 +88,15 @@ const onDelete = id => {
         });
 };
 
-fetch(`${host}/api/auth/user`, { credentials: 'include' })
-    .then(response => {
-        return response.json();
-    })
-    .then(json => {
-        if (json.user) {
-            user.value = json.user;
-        } else {
-            // Si no hay autorización regresa a la página de login
-            router.push('/auth/login');
-        }
-    })
-    .catch(error => {
-        appendAlert(error.message, 'danger');
-    });
-
-reloadAds();
+// Establece el usuario con autorización, o regresa a la página de login
+(async () => {
+    user.value = await getUser();
+    if (user.value) {
+        reloadAds();
+    } else {
+        router.push('/auth/login');
+    }
+})();
 </script>
 
 <template>

@@ -81,8 +81,52 @@ const apiAdsIdPut = async (req, res, next) => {
     }
 };
 
+// Procesa una petición para crear un anuncio: POST /api/ads/create
+const apiAdsCreatePost = async (req, res, next) => {    
+    try {
+        const { text, contact } = req.body;
+        const tv = new TextValidator();
+
+        if (!(
+            tv.validate(text, TextValidator.reAnyWordChar,
+                'El texto debe contener al menos un carácter alfanumérico',
+                { maxLength: 255 }) &&
+            tv.validate(contact, TextValidator.reStr,
+                'Los datos de contacto no son válidos',
+                { maxLength: 64 })
+            )) {
+            return res.status(400).json({
+                error: tv.getLastMessage()
+            });
+        }
+
+        // Se impide la creación de anuncios que ya existan
+        const [result] = await db.execute(`select id from ads
+            where user_id = ? and text = ? and contact = ?`,
+            [req.user.id, text, contact]
+        );
+        if (result.length) {
+            return res.status(400).json({
+                error: 'Ya existe un anuncio con los mismo datos'
+            });
+        }
+        
+        // Agregamos el anuncio
+        await db.execute(
+            'insert into ads(user_id, text, contact) values(?, ?, ?)',
+            [req.user.id, text, contact]);        
+
+        return res.status(201).json({                
+            success: 'Anuncio creado con éxito',
+        });        
+    } catch (error) {
+        return next(error);
+    }
+};
+
 export {    
     apiAdsGet,
     apiAdsIdDelete,
-    apiAdsIdPut
+    apiAdsIdPut,
+    apiAdsCreatePost
 };

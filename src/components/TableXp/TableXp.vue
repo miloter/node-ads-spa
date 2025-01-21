@@ -41,7 +41,7 @@
  *
  *      columnsMultiselect: booleano que indica si se muestra o no
  *      un cuadro de selección de columnas visibles, por defecto es true.
- *
+ * 
  *      csvExport: booleano que indica si se muestra o no un botón
  *      de exportación a archivo CSV, por defecto es true.
  *
@@ -64,7 +64,7 @@
  *      selectedColumnsChanged(selectedColumns): Se produce cuando cambian las
  *      columnas seleccionadas.
   * 
- *      expandChange(isOpened, row): Si se implementa el slot #extra, se emitirá
+ *      expandChanged(isOpened, row): Si se implementa el slot #extra, se emitirá
  *      dicho evento con un indicador truthy de expandido y la fila afectada por
  *      la expasión/contracción de la fila.
  */
@@ -76,13 +76,13 @@ const props = defineProps({
     rows: Array,
     rowsPerPage: { type: Number, default: 10 },
     rowsSelectPage: { type: Array, default: () => [2, 5, 10, 20, 50] },
-    columnsMultiselect: { type: Boolean, default: true },
+    columnsMultiselect: { type: Boolean, default: true },    
     csvExport: { type: Boolean, default: true },
     controlsPagination: { type: Boolean, default: true },
     multiselect: { type: Boolean, default: false }
 });
 const emit = defineEmits(['filterChanged', 'paginatedChanged',
-    'selectedChanged', 'selectedColumnsChanged', 'expandChange']);
+    'selectedChanged', 'selectedColumnsChanged', 'expandChanged']);
 
 const hFilter = ref([]);
 const currentRows = ref([]);
@@ -131,9 +131,9 @@ function clickOutside(e) {
     }
 }
 
-function expandChange(row) {
+function expandChanged(row) {
     row[symRowExpand] = !row[symRowExpand];
-    emit('expandChange', row[symRowExpand], row);
+    emit('expandChanged', row[symRowExpand], row);
 }
 
 function changeChecked(value, row) {
@@ -537,7 +537,7 @@ change();
                                 @click="changeChecked($event.target.checked, r)">
                         </td>
                         <td v-if="$slots.extra">
-                            <a href="#" @click.prevent="expandChange(r)" style="text-decoration: none;">
+                            <a href="#" @click.prevent="expandChanged(r)" style="text-decoration: none;">
                                 {{ r[symRowExpand] ? '∨' : '>' }}
                             </a>
                         </td>
@@ -644,6 +644,8 @@ change();
     z-index: 1;
     background-color: lightgray;
     border: 1px solid black;
+    max-height: 16rem;
+    overflow: auto;
 }
 
 .columns-multiselect-label-main {

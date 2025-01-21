@@ -2,21 +2,12 @@
 import { RouterLink } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../stores.js';
-import { host, appendAlert } from '../utils/globals.js';
+import { getUser } from '../utils/globals.js';
 
 const { user } = storeToRefs(useSession());
 
 // Comprueba si hay un usuario que ha iniciado sesión
-fetch(`${host}/api/auth/user`, { credentials: 'include' })
-    .then(response => {
-        return response.json();
-    })
-    .then(json => {        
-        user.value = json.user;        
-    })
-    .catch(error => {
-        appendAlert(error.message, 'danger');
-    });
+getUser().then(u => user.value = u);
 </script>
 
 <template>
@@ -34,15 +25,24 @@ fetch(`${host}/api/auth/user`, { credentials: 'include' })
                             <RouterLink to="/ads" class="nav-link">Anuncios</RouterLink>
                         </li>
                         <li class="nav-item">
+                            <RouterLink to="/ads/create" class="nav-link">Crear Anuncio</RouterLink>
+                        </li>
+                        <li class="nav-item">
                             <div class="dropdown">
                                 <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown"
                                     aria-expanded="false">
                                     <img v-if="user.avatar" :src="'/uploads/' + user.avatar" width="64"
                                         class="rounded-circle" alt="Avatar del usuario">
-                                    <template v-else>{{ user.username }}</template>
+                                    <template v-else>
+                                        Sesión
+                                    </template>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Acerca de</a></li>
+                                    <li>
+                                        <a class="dropdown-item" @click.prevent href="#">
+                                            {{ user.username }}
+                                        </a>
+                                    </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>

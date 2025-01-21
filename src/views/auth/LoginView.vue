@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
-import { host, appendAlert, removeAlerts } from '../../utils/globals.js';
+import { host, appendAlert, removeAlerts, getUser } from '../../utils/globals.js';
 
 const username = ref('');
 const password = ref('');
@@ -37,6 +37,12 @@ const onSubmit = event => {
             appendAlert(error.message, 'danger');
         });
 };
+
+// Si existe un usuario válido volvemos a la página de anuncios
+(async () => {
+    user.value = await getUser();
+    if (user.value) router.push('/ads');
+})();
 </script>
 
 <template>

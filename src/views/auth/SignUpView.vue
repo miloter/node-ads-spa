@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
-import { host, appendAlert, removeAlerts } from '../../utils/globals.js';
+import { host, getUser, appendAlert, removeAlerts } from '../../utils/globals.js';
 
 const files = ref([]);
 const isFilesReady = ref(true);
@@ -85,6 +85,12 @@ const onFileChange = event => {
         .then(() => isFilesReady.value = true)
         .catch(error => console.error(error));
 }
+
+// Si existe un usuario válido volvemos a la página de anuncios
+(async () => {
+    user.value = await getUser();
+    if (user.value) router.push('/ads');
+})();
 </script>
 
 <template>

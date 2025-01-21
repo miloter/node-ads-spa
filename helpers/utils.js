@@ -132,37 +132,6 @@ const getAuthenticatedUser = async (req, res, next) => {
     }
 };
 
-/**
- * Middleware para interceptar una petición y comprobar que
- * no exista autorización de acceso. Si no existe autorización
- * se pasa al siguiente middleware, pero en caso de que la haya
- * se envía al cliente a la página de inicio.
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- * @returns 
- */
-const requireNoAuthorization = async (req, res, next) => {
-    const token = req.cookies.jwt;
-
-    if (!token) {
-        return next();
-    }
-
-    try {
-        // Extraemos el usuario codificado en el JWT          
-        await new Promise((resolve, reject) => {
-            jwt.verify(token, process.env.JWT_SECRET,
-                (err, payload) => err ? reject(err) : resolve(payload));
-        });
-        // Como hay autorización se le envía a inicio
-        return res.redirect('/');
-    } catch (error) {
-        // Al siguiente middleware
-        return next();
-    }
-};
-
 export {
     rootDir,
     viewsDir,
@@ -175,6 +144,5 @@ export {
     setJwtCookie,
     generateJwt,
     requireAuthorization,
-    getAuthenticatedUser,
-    requireNoAuthorization
+    getAuthenticatedUser
 };

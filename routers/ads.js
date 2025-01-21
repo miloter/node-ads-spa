@@ -1,5 +1,6 @@
 import express from 'express';
 import {    
+    apiAdsCreatePost,
     apiAdsGet,
     apiAdsIdDelete,
     apiAdsIdPut,
@@ -11,5 +12,6 @@ const adsRouter = express.Router();
 adsRouter.get('/api/ads', requireAuthorization, apiAdsGet);
 adsRouter.delete('/api/ads/:id', requireAuthorization, apiAdsIdDelete);
 adsRouter.put('/api/ads', requireAuthorization, apiAdsIdPut);
+adsRouter.post('/api/ads/create', requireAuthorization, apiAdsCreatePost);
 
 export default adsRouter;
