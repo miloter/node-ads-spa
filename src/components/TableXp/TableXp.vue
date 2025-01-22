@@ -76,7 +76,7 @@ const props = defineProps({
     rows: Array,
     rowsPerPage: { type: Number, default: 10 },
     rowsSelectPage: { type: Array, default: () => [2, 5, 10, 20, 50] },
-    columnsMultiselect: { type: Boolean, default: true },    
+    columnsMultiselect: { type: Boolean, default: true },
     csvExport: { type: Boolean, default: true },
     controlsPagination: { type: Boolean, default: true },
     multiselect: { type: Boolean, default: false }
@@ -334,34 +334,65 @@ function downloadFileCSV(filename, content) {
 
 // Devuelve la filas en una cadena con formato CSV        
 function getRowsToCsv() {
+    // Nueva línea estándar en un CSV
+    const nl = '\r\n';
+    // Caracter de entrecomillado para campos que lo requieran
+    const quotes = '"';
+    const dblQuotes = quotes + quotes;
+    // Carácter separador de campos
+    const sep = ';';
     // Generamos la cadena en formato CSV            
     const sb = [];
 
     // Trabajaremos con las cabeceras
     const hs = props.headers.filter(h => h.checked);
 
-    // Cabeceras del CSV            
-    for (let i = 0; i < hs.length; i++) {
-        sb.push('\"');
-        sb.push(hs[i].title.replaceAll("\"", "\"\""));
-        sb.push('\"');
-        if (i < (hs.length - 1)) {
-            sb.push(';');
+    // Escribe el valor actual en el array
+    function writeValue(sb, value) {
+        const hasSep = value.includes(sep);
+        const hasQuotes = value.includes(quotes);
+        const hasLines = value.includes('\r') || value.includes('\n');
+
+        if (hasSep || hasQuotes || hasLines) {
+            sb.push(quotes);
+        }
+        if (hasQuotes) {
+            value = value.replaceAll(quotes, dblQuotes);
+        }
+        sb.push(value);
+        if (hasSep || hasQuotes || hasLines) {
+            sb.push(quotes);
         }
     }
-    sb.push('\n');
 
-    // Cuerpo del CSV            
-    for (const r of currentRows.value) {
+    // Cabeceras del CSV            
+    for (let i = 0; i < hs.length; i++) {
+        const value = hs[i].title;
+
+        writeValue(sb, value);
+        if (i < (hs.length - 1)) {
+            sb.push(sep);
+        }
+    }
+    if (sb.length) {
+        sb.push(nl);
+    }
+
+    // Cuerpo del CSV 
+    let nRows = 0;
+    for (const row of currentRows.value) {
         for (let i = 0; i < hs.length; i++) {
-            sb.push('\"');
-            sb.push(String(r[hs[i].key] ?? '').replace("\"", "\"\""));
-            sb.push('\"');
+            const value = String(row[hs[i].key] ?? '');
+
+            writeValue(sb, value);
             if (i < (hs.length - 1)) {
-                sb.push(';');
+                sb.push(sep);
             }
         }
-        sb.push('\n');
+        nRows++;
+        if (nRows < currentRows.value.length) {
+            sb.push(nl);
+        }
     }
 
     return sb.join('');
