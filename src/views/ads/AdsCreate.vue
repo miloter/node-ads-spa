@@ -3,15 +3,17 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
-import { host, getUser, appendAlert, removeAlerts } from '../../utils/globals.js';
+import { appendAlert, removeAlerts } from '../../utils/globals.js';
 
 const text = ref('');
 const contact = ref('');
 const router = useRouter();
-const { user } = storeToRefs(useSession());
+const { user, spinner } = storeToRefs(useSession());
+const { host, getUser } = useSession();
 
 const onSubmit = () => {
     removeAlerts();
+    spinner.value = true;
     fetch(`${host}/api/ads/create`, {
         credentials: 'include',
         method: 'POST',
@@ -32,7 +34,8 @@ const onSubmit = () => {
         })
         .catch(error => {
             appendAlert(error.message, 'danger');
-        });
+        })
+        .finally(() => spinner.value = false);
 };
 
 // Establece el usuario con autorización, o regresa a la página de login

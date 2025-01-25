@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
-import { host, getUser, appendAlert, removeAlerts } from '../../utils/globals.js';
+import { appendAlert, removeAlerts } from '../../utils/globals.js';
 
 const files = ref([]);
 const isFilesReady = ref(true);
@@ -11,17 +11,17 @@ const email = ref('');
 const username = ref('');
 const password = ref('');
 const router = useRouter();
-const { user } = storeToRefs(useSession());
+const { user, spinner } = storeToRefs(useSession());
+const { host, getUser } = useSession();
 
 const onSubmit = event => {
     event.preventDefault();
-    removeAlerts();
-
+    removeAlerts();    
     // Si los ficheros no están listos termina
     if (!isFilesReady.value) {
         return appendAlert('Los ficheros no están listos, inténtelo en unos momentos', 'warning');
     }
-
+    spinner.value = true;
     // Envía el formulario con los cambios
     fetch(`${host}/api/auth/signup`, {
         credentials: 'include',
@@ -47,12 +47,13 @@ const onSubmit = event => {
         })
         .catch(error => {
             appendAlert(error.message, 'danger');
-        });
+        })
+        .finally(() => spinner.value = false);
 };
 
 const onFileChange = event => {
     isFilesReady.value = false;
-    files.vale = [];
+    files.value = [];
 
     const filePromises = Object.entries(event.target.files).map(item => {
         // Crea una promesa de conversión a base 64 para cada fichero
@@ -81,9 +82,11 @@ const onFileChange = event => {
     });
 
     // Intenta la conversión
+    spinner.value = true;
     Promise.all(filePromises)
         .then(() => isFilesReady.value = true)
-        .catch(error => console.error(error));
+        .catch(error => console.error(error))
+        .finally(() => spinner.value = false);
 }
 
 // Si existe un usuario válido volvemos a la página de anuncios

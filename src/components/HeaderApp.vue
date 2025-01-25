@@ -2,9 +2,9 @@
 import { RouterLink } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../stores.js';
-import { getUser } from '../utils/globals.js';
 
-const { user } = storeToRefs(useSession());
+const { user, spinner } = storeToRefs(useSession());
+const { getUser } = useSession();
 
 // Comprueba si hay un usuario que ha iniciado sesión
 getUser().then(u => user.value = u);
@@ -69,5 +69,9 @@ getUser().then(u => user.value = u);
             </div>
         </div>
     </nav>
+    <div v-show="spinner" class="d-flex justify-content-center">
+        <div class="spinner-border text-success" role="status"
+            style="width: 11rem; height: 11rem;"></div>
+    </div>
     <div id="alert"></div>
 </template>

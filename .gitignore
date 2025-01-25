@@ -1,5 +1,7 @@
 .vscode/
 node_modules/
+public/assets/
+public/uploads/
 dist/
 
 .env

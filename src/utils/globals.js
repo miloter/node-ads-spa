@@ -1,26 +1,4 @@
 /**
- * Dirección del HOST donde haremos las peticiones.
- */
-const host = 'http://localhost:8080';
-
-/**
- * Devuelve el usuario autenticado o null si no lo está.
- */
-function getUser() {
-    return fetch(`${host}/api/auth/user`, { credentials: 'include' })
-        .then(response => {
-            return response.json();
-        })
-        .then(json => {
-            return json.user;
-        })
-        .catch(error => {
-            appendAlert(error.message, 'danger');
-            return null;
-        });
-}
-
-/**
  * Permite acceso a métodos y propiedades globales a toda la aplicación.
  */
 
@@ -51,9 +29,7 @@ function removeAlerts() {
     }
 }
 
-export {
-    host,
-    getUser,
+export {    
     appendAlert,
     removeAlerts
 };

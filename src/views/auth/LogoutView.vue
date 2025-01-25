@@ -2,11 +2,13 @@
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
-import { host, appendAlert } from '../../utils/globals.js';
+import { appendAlert } from '../../utils/globals.js';
 
 const router = useRouter();
-const { user } = storeToRefs(useSession());
+const { user, spinner } = storeToRefs(useSession());
+const { host } = useSession();
 
+spinner.value = true;
 fetch(`${host}/api/auth/logout`, { credentials: 'include' })
     .then(response => {
         return response.json()
@@ -18,7 +20,8 @@ fetch(`${host}/api/auth/logout`, { credentials: 'include' })
     })
     .catch(error => {
         appendAlert(error.message, 'danger');
-    });
+    })
+    .finally(() => spinner.value = false);
 </script>
 
 <template>

@@ -4,9 +4,10 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
 import TableXp from '../../components/TableXp/TableXp.vue';
-import { host, getUser, appendAlert, removeAlerts } from '../../utils/globals.js';
+import { appendAlert, removeAlerts } from '../../utils/globals.js';
 
-const { user } = storeToRefs(useSession());
+const { user, spinner } = storeToRefs(useSession());
+const { host, getUser } = useSession();
 const router = useRouter();
 const headers = ref([{
     title: 'Usuario',
@@ -31,6 +32,7 @@ const headers = ref([{
 const rows = ref([]);
 
 const reloadAds = () => {
+    spinner.value = true;
     return fetch(`${host}/api/ads`, { credentials: 'include' })
         .then(response => {
             return response.json();
@@ -41,11 +43,13 @@ const reloadAds = () => {
         })
         .catch(error => {
             appendAlert(error.message, 'danger');
-        });
+        })
+        .finally(() => spinner.value = false);
 };
 
 const onUpdate = (id, text, contact) => {
     removeAlerts();
+    spinner.value = true;
     // Envía un PUT para actualizar el anuncio
     fetch(`${host}/api/ads`, {
         credentials: 'include',
@@ -65,12 +69,14 @@ const onUpdate = (id, text, contact) => {
         })
         .catch(error => {
             appendAlert(error.message, 'danger');
-        });
+        })
+        .finally(() => spinner.value = false);;
 };
 
 const onDelete = id => {
     if (!confirm(`¿Eliminar el anuncio con ID ${id}?`)) return;
     removeAlerts();
+    spinner.value = true;
     fetch(`${host}/api/ads/${id}`, {
         credentials: 'include',
         method: 'DELETE'
@@ -85,7 +91,8 @@ const onDelete = id => {
         })
         .catch(error => {
             appendAlert(error.message, 'danger');
-        });
+        })
+        .finally(() => spinner.value = false);
 };
 
 // Establece el usuario con autorización, o regresa a la página de login

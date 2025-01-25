@@ -3,17 +3,18 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSession } from '../../stores.js';
-import { host, appendAlert, removeAlerts, getUser } from '../../utils/globals.js';
+import { appendAlert, removeAlerts } from '../../utils/globals.js';
 
 const username = ref('');
 const password = ref('');
 const router = useRouter();
-const { user } = storeToRefs(useSession());
+const { user, spinner } = storeToRefs(useSession());
+const { host, getUser } = useSession();
 
 const onSubmit = event => {
     event.preventDefault();
     removeAlerts();
-
+    spinner.value = true;
     fetch(`${host}/api/auth/login`, {
         credentials: 'include',
         method: 'POST',
@@ -35,7 +36,8 @@ const onSubmit = event => {
         })
         .catch(error => {
             appendAlert(error.message, 'danger');
-        });
+        })
+        .finally(() => spinner.value = false);
 };
 
 // Si existe un usuario válido volvemos a la página de anuncios
